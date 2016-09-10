@@ -1,0 +1,19 @@
+{
+  "name": "bing-hue",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cody Hoover",
+  "license": "ISC",
+  "dependencies": {
+    "get-image-colors":"^1.5.0",
+    "request": "~2.74.0",
+    "node-hue-api": "~2.2.0",
+    "suncalc": "~1.7.0",
+    "lodash": "~4.15.0",
+    "locallydb": "~0.0.9"
+  }
+}

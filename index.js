@@ -1,0 +1,1 @@
+console.log('Use bingScenes.js to set scenes based on the bing image of the day and fluxScenes.js to adjust scene temperatures based on the time of day');
