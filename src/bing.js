@@ -17,9 +17,13 @@ const BING_FILENAME = 'bing.jpg';
 const updateBingScenes = () => {
     downloadImageOfTheDay(BING_FILENAME)
     .then(() => { return colorsApi.getColorsFromFile(BING_FILENAME); })
-    .then((colors) => { return colors.map(hue.getStateFromColor)})
-    .then((states) => hue.updateScenesWithName(BING_SCENE_NAME, states))
-    .catch(error => errorHandler);
+    .then((colors) => { 
+        console.log(`Got these colors from file: ${JSON.stringify(colors)}\n`);
+        return colors.map(hue.getStateFromColor)
+    }).then((states) => { 
+        console.log(`Created these states from colors: ${JSON.stringify(states)}\n`);
+        return hue.updateScenesWithName(BING_SCENE_NAME, states)
+    }).catch(error => errorHandler);
 }
 
 const downloadImageOfTheDay = (filename) => {
@@ -39,7 +43,7 @@ const getBingImageUrls = (numberOfUrls) => {
 const saveUrlToFile = (url, filename) => {
     return request(url, {encoding: 'binary'})
         .then(data => { fs.writeFileSync(filename, data, 'binary')})
-        .catch(error => console.log(error));
+        .catch(error => console.log(JSON.stringify(error)));
 } 
 
 const getUrlsFromApiResponse = (body) => {

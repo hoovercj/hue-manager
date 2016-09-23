@@ -20,7 +20,6 @@ const getColorsFromFile = (filename) => {
 /** PRIVATE FUNCTIONS */
 
 const processColorObject = color => {
-    console.log(`color.hsl = ${color.hsl()}`);
     return {
         hue: Math.floor(color.hsl()[0] * HUE_SCALAR),
         sat: Math.floor(color.hsl()[1] * SAT_MAX),
@@ -29,7 +28,6 @@ const processColorObject = color => {
 }
 
 const setLightColor = (api, color, index) => {
-    console.log(`Setting: ${index} to ${JSON.stringify(color)}`)
     api.setLightState(index, lightState.create().hue(color.hue).sat(color.sat));
 }
 

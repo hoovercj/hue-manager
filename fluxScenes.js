@@ -1,2 +1,2 @@
-const flux = require('./flux');
+const flux = require('./src/flux');
 flux.updateFluxScenes();

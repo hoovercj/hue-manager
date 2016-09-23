@@ -4,7 +4,7 @@ const errorHandler = require('./utils').errorHandler;
 const flux = require('./flux');
 
 const storage = require('./storage').collection;
-const config = require('./.config');
+const config = require('../config.json');
 
 const FILENAME = 'bing.jpg';
 
@@ -27,17 +27,18 @@ const updateScenesWithName = (name, states) => {
     // coerce states into an array
     states = [].concat(states);
     getScenesWithName(name)
-    .then(scenes => scenes.forEach((scene) => {
-        console.log('Scene: ' + scene.id);
-        scene.lights.forEach((lightId, lightIndex) => {
-            console.log('Light: ' + lightId);
-            api.setSceneLightState(scene.id, lightId, states[lightIndex % states.length]);
+    .then(scenes => {
+        console.log(`Updating these scenes: ${JSON.stringify(scenes)}\n`);
+        return scenes.forEach((scene) => {
+            scene.lights.forEach((lightId, lightIndex) => {
+                api.setSceneLightState(scene.id, lightId, states[lightIndex % states.length]);
+            });
         });
-    }));
+    });
 }
 
 const getStateFromColor = (color) => {
-    return lightState.create().on().hue(color);
+    return lightState.create().on().hue(color.hue).sat(color.sat).bri(color.bri);
 }
 
 const getStateFromTemperature = (temperature) => {
@@ -47,8 +48,12 @@ const getStateFromTemperature = (temperature) => {
 const getScenesWithName = (name) => {
     return api.getScenes()
         .then(scenes => { 
-            return scenes.filter(scene.name.toLowerCase()
-                   .includes(name.toLowerCase()))});
+            // console.log('Scenes: ' + JSON.stringify(scenes));
+            return scenes.filter(scene => { 
+                return scene.name.toLowerCase()
+                   .includes(name.toLowerCase());
+            });
+        });
 }
 
 const getGroupForScene = (scene) => {

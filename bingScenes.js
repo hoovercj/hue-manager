@@ -1,2 +1,2 @@
-const bing = require('./bing');
+const bing = require('./src/bing');
 bing.updateBingScenes();

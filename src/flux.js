@@ -45,6 +45,17 @@ const getTemperature = () => {
     }
 }
 
+const updateFluxScenes = () => {
+    let temperature = getTemperature();
+    console.log('temp: ' + temperature);
+    let state = hue.getStateFromTemperature(temperature);
+    hue.updateScenesWithName(FLUX_SCENE_NAME, state);
+    
+    recallFluxScenesIfActive();
+}
+
+/** PRIVATE FUNCTIONS */
+
 const activateFluxScenes = () => {
     // Need to do a few things:
     // 1. Match scenes to groups
@@ -57,15 +68,6 @@ const activateFluxScenes = () => {
     .then(scenes => scenes.forEach(scene => {
         api.recallScene(scene.id);
     }));
-}
-
-const updateFluxScenes = () => {
-    let temperature = getTemperature();
-    console.log('temp: ' + temperature);
-    let state = hue.getStateFromTemperature(temperature);
-    hue.updateScenesWithName(FLUX_SCENE_NAME, state);
-    
-    recallFluxScenesIfActive();
 }
 
 const recallFluxScenesIfActive = () => {
