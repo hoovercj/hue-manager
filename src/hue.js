@@ -2,8 +2,6 @@ const bing = require('./bing');
 const setLightColorsFromFile = require('./colors').setLightColorsFromFile;
 const errorHandler = require('./utils').errorHandler;
 const flux = require('./flux');
-
-const storage = require('./storage').collection;
 const config = require('../config.json');
 
 const FILENAME = 'bing.jpg';
@@ -26,14 +24,28 @@ var _ = require('lodash/core');
 const updateScenesWithName = (name, states) => {
     // coerce states into an array
     states = [].concat(states);
-    getScenesWithName(name)
+    return getScenesWithName(name)
     .then(scenes => {
-        console.log(`Updating these scenes: ${JSON.stringify(scenes)}\n`);
+        console.log(`Updating these scenes:`);
         return scenes.forEach((scene) => {
+            console.log(`Scene: ${scene.id}`);
             scene.lights.forEach((lightId, lightIndex) => {
-                api.setSceneLightState(scene.id, lightId, states[lightIndex % states.length]);
+                let newState = states[lightIndex % states.length];
+                console.log(`light: ${lightId} - ${JSON.stringify(newState)}`);
+                api.setSceneLightState(scene.id, lightId, newState);
             });
+            console.log();
         });
+    });
+}
+
+const updateSceneWithId = (sceneId, state) => {
+    console.log(`Update scene ${sceneId}`);
+    return api.scene(sceneId).then(scene => {
+        return Promise.all(scene.lights.map(light => {
+            console.log(`Set scene ${sceneId} light ${light} to ${JSON.stringify(state)}\n`);
+            return api.setSceneLightState(sceneId, light, state);
+        }));
     });
 }
 
@@ -47,34 +59,13 @@ const getStateFromTemperature = (temperature) => {
 
 const getScenesWithName = (name) => {
     return api.getScenes()
-        .then(scenes => { 
-            // console.log('Scenes: ' + JSON.stringify(scenes));
-            return scenes.filter(scene => { 
+        .then(scenes => {
+            return scenes.filter(scene => {
                 return scene.name.toLowerCase()
                    .includes(name.toLowerCase());
             });
         });
 }
-
-const getGroupForScene = (scene) => {
-    // TODO: check bounds
-    return api.groups()
-        .then(groups => { 
-            return groups.filter(isRoom)
-                .filter(group => { return groupContainsScene(group, scene); })[0];
-        });
-}
-
-const isGroupActive = (group) => {
-    return _.isEqual(storage.get(group.id), group.lastAction);
-}
-
-const updateSavedGroupState = (group) => {
-    api.group(group.id).then(group => {
-        storage.update(group.id, group.lastAction);
-    });
-}
-
 
 /** PRIVATE FUNCTIONS */
 
@@ -91,9 +82,7 @@ const groupContainsScene = (group, scene) => {
 
 exports.getScenesWithName = getScenesWithName;
 exports.updateScenesWithName = updateScenesWithName;
+exports.updateSceneWithId = updateSceneWithId;
 exports.getStateFromColor = getStateFromColor;
 exports.getStateFromTemperature = getStateFromTemperature;
-exports.getGroupForScene = getGroupForScene;
-exports.isGroupActive = isGroupActive;
-exports.updateSavedGroupState = updateSavedGroupState;
 exports.api = api;
