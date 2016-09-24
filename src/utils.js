@@ -1,4 +1,5 @@
 const request = require('request');
+const winston = require('winston');
 
 const requestPromise = (url, options) => {
     return new Promise((resolve, reject) => {
@@ -10,7 +11,7 @@ const requestPromise = (url, options) => {
 
 /** PUBLIC API */
 const errorHandler = (error) => {
-    console.error(error);
+    winston.error(error);
 }
 
 exports.requestPromise = requestPromise;

@@ -11,7 +11,8 @@ const TEMP_RANGE = MAX_TEMP - MIN_TEMP;
 const FLUX_SCENE_NAME = 'flux';
 const TEMPERATURE_KEY = 'temperature';
 
-var storage = require('node-persist');
+const winston = require('winston');
+const storage = require('node-persist');
 storage.initSync();
 
 /** PUBLIC API */
@@ -20,9 +21,9 @@ const updateFluxScenes = () => {
     let oldTemperature = getStoredTemperature();
     let newTemperature = getTemperature();
     let newState = hue.getStateFromTemperature(newTemperature);
-    console.log(`Old temperature: ${oldTemperature}`);
-    console.log(`New temperature: ${newTemperature}`);
-    console.log(`New state: ${JSON.stringify(newState)}`);
+    winston.info(`Old temperature: ${oldTemperature}`);
+    winston.info(`New temperature: ${newTemperature}`);
+    winston.info(`New state: ${JSON.stringify(newState)}`);
     setStoredTemperature(newTemperature);
 
     return hue.getScenesWithName(FLUX_SCENE_NAME)
@@ -31,23 +32,23 @@ const updateFluxScenes = () => {
             return Promise.all(scene.lights.map(light => {
                 return hue.api.lightStatus(light)
                        .then(status => {
-                           console.log(`light ${light} has temperature ${status.state.ct}`);
+                           winston.info(`light ${light} has temperature ${status.state.ct}`);
                            return status.state.ct == oldTemperature;
                        });
             })).then(lightStatuses => {
-                console.log(`Light statuses for ${scene.id}: ${JSON.stringify(lightStatuses)}`);
+                winston.info(`Light statuses for ${scene.id}: ${JSON.stringify(lightStatuses)}`);
                 return lightStatuses.every(status => status);
             }).then(active => {
                 return hue.updateSceneWithId(scene.id, newState).then(() => {
                     if(active) {
-                        console.log(`Recalling scene ${scene.id}`);
+                        winston.info(`Recalling scene ${scene.id}`);
                         return hue.api.recallScene(scene.id);
                     }
-                    console.log(`Scene ${scene.id} not active`);
+                    winston.info(`Scene ${scene.id} not active`);
                 })
             });
         })
-    }).then(console.log('updateFluxScenes complete'));
+    }).then(winston.info('updateFluxScenes complete'));
 }
 
 /** PRIVATE FUNCTIONS */
@@ -57,7 +58,7 @@ const getStoredTemperature = () => {
 }
 
 const setStoredTemperature = (temperature) => {
-    console.log(`Storing temperature ${temperature}`);
+    winston.info(`Storing temperature ${temperature}`);
     storage.setItemSync(TEMPERATURE_KEY, temperature);
 }
 
@@ -78,7 +79,7 @@ const getTemperature = () => {
         let percentageTowardsMidnight = timeBetweenNowAndMidnight / timeBetweenGoldenHourAndMidnight;
         let percentageLight = 1 - percentageTowardsMidnight;
         temp = MAX_TEMP - (percentageLight * TEMP_RANGE);
-        console.log(`Time is after evening golden hour but before midnight.`);
+        winston.info(`Time is after evening golden hour but before midnight.`);
     } 
     // Now is after midnight but before the morning golden hour
     else if (now < times.godenHourEnd) {
@@ -89,14 +90,14 @@ const getTemperature = () => {
         let timeBetweenNowAndMidnight = now - midnight;
         let percentageLight = timeBetweenNowAndMidnight / timeBetweenGoldenHourAndMidnight;
         temp = MAX_TEMP - (percentageLight * TEMP_RANGE);
-        console.log(`Time is after midnight but before the morning golden hour.`);
+        winston.info(`Time is after midnight but before the morning golden hour.`);
     }
     // Now is "daytime"
     else {
-        console.log('Now it is daytime');
+        winston.info('Now it is daytime');
         temp = MIN_TEMP;
     }
-    console.log(`Temperature is ${temp}\n`);
+    winston.info(`Temperature is ${temp}\n`);
     return temp;
 }
 

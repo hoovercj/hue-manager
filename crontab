@@ -1,2 +1,2 @@
-*/1 * * * * root node ~/Documents/github/hue-manager/fluxScenes.js
+*/5 0-10,16-24 * * * root node ~/Documents/github/hue-manager/fluxScenes.js
 * 7 */1 * * root node ~/Documents/github/hue-manager/bingScenes.js

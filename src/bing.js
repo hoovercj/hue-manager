@@ -12,16 +12,18 @@ const BING_URL = 'http://www.bing.com';
 const BING_SCENE_NAME = 'bing';
 const BING_FILENAME = 'bing.jpg';
 
+const winston = require('winston');
+
 /** PUBLIC API */
 
 const updateBingScenes = () => {
     downloadImageOfTheDay(BING_FILENAME)
     .then(() => { return colorsApi.getColorsFromFile(BING_FILENAME); })
     .then((colors) => { 
-        console.log(`Got these colors from file: ${JSON.stringify(colors)}\n`);
+        winston.info(`Got these colors from file: ${JSON.stringify(colors)}\n`);
         return colors.map(hue.getStateFromColor)
     }).then((states) => { 
-        console.log(`Created these states from colors: ${JSON.stringify(states)}\n`);
+        winston.info(`Created these states from colors: ${JSON.stringify(states)}\n`);
         return hue.updateScenesWithName(BING_SCENE_NAME, states)
     }).catch(error => errorHandler);
 }
@@ -43,7 +45,7 @@ const getBingImageUrls = (numberOfUrls) => {
 const saveUrlToFile = (url, filename) => {
     return request(url, {encoding: 'binary'})
         .then(data => { fs.writeFileSync(filename, data, 'binary')})
-        .catch(error => console.log(JSON.stringify(error)));
+        .catch(error => winston.info(JSON.stringify(error)));
 } 
 
 const getUrlsFromApiResponse = (body) => {

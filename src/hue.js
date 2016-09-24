@@ -13,7 +13,8 @@ const hue = require('node-hue-api'),
     username = config.hue.username,
     api = new HueApi(host, username);
 
-var _ = require('lodash/core');
+const _ = require('lodash/core');
+const winston = require('winston');
 
 /** PUBLIC API */
 
@@ -26,24 +27,24 @@ const updateScenesWithName = (name, states) => {
     states = [].concat(states);
     return getScenesWithName(name)
     .then(scenes => {
-        console.log(`Updating these scenes:`);
+        winston.info(`Updating these scenes:`);
         return scenes.forEach((scene) => {
-            console.log(`Scene: ${scene.id}`);
+            winston.info(`Scene: ${scene.id}`);
             scene.lights.forEach((lightId, lightIndex) => {
                 let newState = states[lightIndex % states.length];
-                console.log(`light: ${lightId} - ${JSON.stringify(newState)}`);
+                winston.info(`light: ${lightId} - ${JSON.stringify(newState)}`);
                 api.setSceneLightState(scene.id, lightId, newState);
             });
-            console.log();
+            winston.info();
         });
     });
 }
 
 const updateSceneWithId = (sceneId, state) => {
-    console.log(`Update scene ${sceneId}`);
+    winston.info(`Update scene ${sceneId}`);
     return api.scene(sceneId).then(scene => {
         return Promise.all(scene.lights.map(light => {
-            console.log(`Set scene ${sceneId} light ${light} to ${JSON.stringify(state)}\n`);
+            winston.info(`Set scene ${sceneId} light ${light} to ${JSON.stringify(state)}\n`);
             return api.setSceneLightState(sceneId, light, state);
         }));
     });
